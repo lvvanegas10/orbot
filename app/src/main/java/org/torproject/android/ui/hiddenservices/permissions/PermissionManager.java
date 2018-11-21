@@ -56,25 +56,28 @@ public class PermissionManager {
 
     @TargetApi(Build.VERSION_CODES.M)
     public static void requestBatteryPermmssions(FragmentActivity activity, Context context) {
-        final Context mContext = context;
-        final String packageName = mContext.getPackageName();
-        PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            final Context mContext = context;
+            final String packageName = mContext.getPackageName();
+            
+            PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+            if (pm.isIgnoringBatteryOptimizations(packageName))
+                return;
 
-        if (pm.isIgnoringBatteryOptimizations(packageName))
-            return;
-
-        Snackbar.make(activity.findViewById(android.R.id.content),
-                R.string.consider_disable_battery_optimizations,
-                VERY_LONG_LENGTH).setAction(R.string.disable,
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent();
-                        intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                        intent.setData(Uri.parse("package:" + packageName));
-                        mContext.startActivity(intent);
-                    }
-                }).show();
+            Snackbar.make(activity.findViewById(android.R.id.content),
+                    R.string.consider_disable_battery_optimizations,
+                    VERY_LONG_LENGTH).setAction(R.string.disable,
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent();
+                            intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                            intent.setData(Uri.parse("package:" + packageName));
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            mContext.startActivity(intent);
+                        }
+                    }).show();
+        } 
     }
 
     @TargetApi(Build.VERSION_CODES.M)
